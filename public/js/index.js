@@ -93,6 +93,7 @@ async function loadNavbar () {
         .then(response => response.text())
         .then(data => {
             document.getElementById('navbar-placeholder').innerHTML = data; 
+            initNavbar();
         })
         .catch(error => {
             console.error('Error loading the navbar:', error);

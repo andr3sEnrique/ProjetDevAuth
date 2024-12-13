@@ -13,7 +13,6 @@ const BlogSchema = new Schema({
             delete ret.createdAt;
             delete ret.updatedAt;
             delete ret.__v;
-            delete ret._id;
         }
     }
 });

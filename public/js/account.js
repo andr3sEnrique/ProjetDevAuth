@@ -2,6 +2,8 @@ const form = document.querySelector("form");
 const errorsContainer = document.getElementById('errors');
 const successContainer = document.getElementById('success');
 const API_URL_USER = 'http://localhost:3000/user'
+const passwordInput = document.getElementById('password');
+const passwordIcon = document.getElementById('show-password');
 
 function isEmailValid(email) {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -49,6 +51,7 @@ function handleResponse(result, option) {
         form.reset();
 
         if (option === 'login') {
+            localStorage.setItem('token', result.data);
             window.location.href = '/';
         } else if (option === 'register') {
             window.location.href = '/user/login';
@@ -58,6 +61,12 @@ function handleResponse(result, option) {
         errorsContainer.innerHTML = `<li class="text-danger">${result.error.message}</li>`;
     }
 }
+
+passwordIcon.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    
+});
 
 
 form.addEventListener('submit', async (e) => {

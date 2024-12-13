@@ -6,6 +6,42 @@ module.exports.getFeaturedBlogsPublics = async (req, res, next) => {
     const blogs = await Blog.find({ isPrivate: false }).limit(5);
     return res.jsonSuccess(blogs, 201);
 }
+
+module.exports.sendUpdateBlog = async (req, res) => {
+    const { id } = req.params;
+    const body = req.body;
+
+    const blog = await Blog.findByIdAndUpdate(id, body);
+
+    if (!blog) {
+        return res.jsonError("Blog not found.", 404);
+    }
+
+    return res.jsonSuccess("Blog updated successfully.", 200);
+}
+
+module.exports.getBlog = async (req, res) => {
+    const { id } = req.params;
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+        return res.jsonError("Blog not found.", 404);
+    }
+
+    return res.jsonSuccess(blog, 200);
+}
+
+module.exports.deleteBlog = async (req, res, next) => {
+    const { id } = req.params;
+    const blog = await Blog.deleteOne({ _id: id });
+    if (blog.deletedCount === 0) return res.jsonError(`No blogs available with id ${id}`, 404);
+    return res.jsonSuccess(blog, 200);
+}
+
+module.exports.updateBlog = async (req, res, next) => {
+    res.sendFile(path.join(__dirname, '../public/views/content', 'update-form.html'));
+}
+
 module.exports.getForm = (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'blog-form.html'));
 }
@@ -17,6 +53,10 @@ module.exports.getNavbar = (req, res) => {
 module.exports.getBlogsPublics = async (req, res, next) => {
     const blogs = await Blog.find({ isPrivate: false });
     return res.jsonSuccess(blogs, 201);
+}
+
+module.exports.getPrivateBlogs = async (req, res) => {
+    const blogs = await Blog.find({})
 }
 
 module.exports.createBlog = async (req, res) => {

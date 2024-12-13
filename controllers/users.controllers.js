@@ -3,6 +3,21 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { authenticator } = require('otplib');
 const qrcode = require('qrcode');
+const SECRET_KEY = 'uQb3$rXzL#91hN4M*7KdY!@zX&pfQ2!d';
+const jwt = require('jsonwebtoken');
+const { addToBlacklist, clearBlacklist } = require('../middlewares/auth');
+
+
+const getUsernameFromToken = (req) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new Error('Authorization token missing or invalid');
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, SECRET_KEY);
+    return decoded.username;
+};
 
 module.exports.getLogin = async (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'login.html'));
@@ -12,7 +27,11 @@ module.exports.getRegister = async (req, res) => {
 }
 
 module.exports.getProfileView = async (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'profile.html'));
+    if(req.session?.userId && req.session?.loggedIn) {
+        res.sendFile(path.join(__dirname, '../public', 'profile.html'));
+    }else {
+        res.jsonError("You don't have permission ",401);
+    }
 }
 
 module.exports.showQrModal = (req, res) => {
@@ -20,30 +39,25 @@ module.exports.showQrModal = (req, res) => {
 }
 
 module.exports.isValidProfile = async (req, res) => {
-    let username;
-    if (req.session?.passport?.user?.username) {
-        username = req.session.passport.user.username;
-    }else if (req.session?.userId && req.session?.loggedIn) {
-        username = req.session.userId;
-    }
+    try {
+        const username = getUsernameFromToken(req);
+        const userFile = `./users/${username}.json`;
 
-    if (!username) {
-        return res.jsonError('User not logged in', 401);
+        if (!fs.existsSync(userFile)) {
+            return res.jsonError(`Invalid credentials`, 400);
+        }
+
+        const userData = JSON.parse(fs.readFileSync(userFile));
+        if (userData.twoFactorEnabled && userData.name && userData.bio) {
+            return res.jsonSuccess('Valid profile', 200);
+        }
+
+        return res.jsonError(`Invalid Profile`, 400);
+    } catch (error) {
+        console.error(error);
+        return res.jsonError(error.message, 401);
     }
-    const userFile = `./users/${username}.json`;
-    if (!fs.existsSync(userFile)) {
-        return res.jsonError(
-            `Invalid credentials`, 400);
-    }
-    const userData = JSON.parse(fs.readFileSync(userFile));
-    if(userData.twoFactorEnabled && userData.name && userData.bio) {
-        return res.jsonSuccess('Valid profile', 200);
-        
-    }
-    
-    return res.jsonError(
-        `Invalid Profile`, 400);
-}
+};
 
 module.exports.createAccount = async (req, res) => {
     const { username, password } = req.body;
@@ -94,16 +108,7 @@ module.exports.updateUser = async (req, res) => {
 };
 
 module.exports.getQrCode = async (req, res) => {
-    let username;
-    if (req.session?.passport?.user?.username) {
-        username = req.session.passport.user.username;
-    }else if (req.session?.userId && req.session?.loggedIn) {
-        username = req.session.userId;
-    }
-
-    if (!username) {
-        return res.jsonError('User not logged in', 401);
-    }
+    const username = getUsernameFromToken(req);
     const service = 'BlogApp2FA';
     const authenticatorSecret = authenticator.generateSecret();
     const guessableFileName = Buffer.from(username).toString('base64').substring(0,6);
@@ -181,8 +186,19 @@ module.exports.passwordMatch = async (req, res) => {
 }
 
 module.exports.isTwoFactorActivate = (req, res) => {
-    const {username } = req.body;
+    let username;
 
+    if (req.headers.authorization) {
+        username = getUsernameFromToken(req)
+    }
+
+    if (!username && req.body.username) {
+        username = req.body.username;
+    }
+
+    if (!username) {
+        return res.jsonError('Username not provided', 400);
+    }
     const userFile = `./users/${username}.json`;
     const userData = JSON.parse(fs.readFileSync(userFile));
     if (userData.twoFactorEnabled) {
@@ -206,6 +222,16 @@ module.exports.loginUser = async (req,res) => {
         return res.jsonError(
             `Invalid Credentials`, 400);
     }
+
+    const token = jwt.sign(
+        {
+            username: userData.username,
+            twoFactorEnabled: userData.twoFactorEnabled
+        },
+        SECRET_KEY,
+        { expiresIn: '1h' }
+    );
+
     req.session.loggedIn = true
     req.session.userId = username;
     req.session.save(err => {
@@ -214,7 +240,7 @@ module.exports.loginUser = async (req,res) => {
             return res.jsonError('Failed to save session', 500);
         }
         console.log(`Session saved: ${JSON.stringify(req.session)}`);
-        return res.jsonSuccess('Login successful', 200);
+        return res.jsonSuccess(token, 200);
     });
 }
 
@@ -245,29 +271,54 @@ module.exports.getUsersPublics = async (req, res) => {
 }
 
 module.exports.logoutUser = async (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Failed to destroy session:', err);
-            return res.jsonError('Failed to logout', 500);
-        }
-        res.clearCookie('connect.sid');
-        return res.jsonSuccess('Logged out successfully', 200);
-    });
+    try {
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(' ')[1];
+        addToBlacklist(token);
+
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Failed to destroy session:', err);
+                return res.jsonError('Failed to logout', 500);
+            }
+            res.clearCookie('connect.sid');
+            return res.jsonSuccess('Logged out successfully', 200);
+        });
+    } catch (err) {
+        console.error('Error during logout:', err);
+        return res.jsonError('Internal server error', 500);
+    }
 };
+
+module.exports.logoutAllDevices = async (req, res) => {
+    const { authCode } = req.body;
+    const username = getUsernameFromToken(req);
+    const guessableFileName = Buffer.from(username).toString('base64').substring(0, 6);
+    const directoryName = path.join(__filename, '..', 'otpkeys');
+    const secretPath = path.join(directoryName, guessableFileName);
+
+    if (!fs.existsSync(secretPath)) {
+        return res.jsonError('2FA not configured for this user.', 404);
+    }
+
+    const secret = fs.readFileSync(secretPath, 'utf-8');
+    const isValid = authenticator.check(authCode, secret);
+
+    if (!isValid) {
+        return res.jsonError('Invalid 2FA code', 400);
+    }
+
+    clearBlacklist();
+    res.clearCookie('connect.sid');
+    return res.jsonSuccess('Logged out from all devices successfully', 200);
+
+}
+
 
 
 module.exports.getCurrentUser = async (req, res) => {
     try {
-        let username;
-        if (req.session?.passport?.user?.username) {
-            username = req.session.passport.user.username;
-        }else if (req.session?.userId && req.session?.loggedIn) {
-            username = req.session.userId;
-        }
-
-        if (!username) {
-            return res.jsonError('User not logged in', 401);
-        }
+        const username = getUsernameFromToken(req);
 
         const userFile = `./users/${username}.json`;
 

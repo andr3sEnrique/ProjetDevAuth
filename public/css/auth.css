@@ -1,0 +1,62 @@
+.container {
+    max-width: 500px;
+    margin-top: 50px;
+}
+
+.google-btn, .github-btn {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.google-btn button:hover {
+    background-color: #f2f2f2;
+}
+
+.github-btn button:hover {
+    background-color: #333;
+}
+
+.google-btn button {
+    background-color: #ffff;
+    color: black;
+    border: 2px solid #000000;
+    padding: 10px 20px;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.github-btn button {
+    background-color: #414141;
+    color: white;
+    border: 2px solid #333;
+    padding: 10px 20px;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-btn button img, .github-btn button img {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.burger-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    z-index: 2;
+}

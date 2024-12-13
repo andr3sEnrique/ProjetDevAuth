@@ -10,6 +10,7 @@ async function loadNavbar () {
         .then(response => response.text())
         .then(data => {
             document.getElementById('navbar-placeholder').innerHTML = data; 
+            initNavbar();
         })
         .catch(error => {
             console.error('Error loading the navbar:', error);
@@ -52,6 +53,10 @@ const getBlogs = async () => {
                             <p><strong>Content : </strong>${blog.content}</p>
                             <p><strong>Is Private : </strong>${blog.isPrivate}</p>
                             <small>by ${blog.author}</small>
+                            <div class="mb-3 mt-3">
+                                <button class="btn btn-danger" data-id="${blog._id}">Delete</button>
+                                <button class="btn btn-info" data-id="${blog._id}">Modify</a>
+                            </div>
                         </div>
                     </div>
                  </div>
@@ -60,6 +65,41 @@ const getBlogs = async () => {
                 blogsContainer.classList.add('row', 'g-4');
                 blogsContainer.appendChild(blogNode);
             });
+
+            const updateButtons = blogsContainer.querySelectorAll('.btn-info');
+            updateButtons.forEach(button =>  {
+                button.addEventListener('click', async (e) => {
+                    const id = e.target.dataset.id;
+                    handleNavigation(`${API_URL_BLOG}/update?id=${id}`);
+                });
+            })
+
+            const deleteButtons = blogsContainer.querySelectorAll('.btn-danger');
+            deleteButtons.forEach(button =>(
+                button.addEventListener('click', async (e) => {
+                    const id = e.target.dataset.id;
+                    const answer = confirm('Are you sure you want to delete this chapter?');
+                    if (answer) {
+                        const response = await fetch(`${API_URL_BLOG}/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                            },
+                            credentials: "include"
+                        });
+                        const result = await response.json();
+                        if (response.ok && result.success) {
+                            successContainer.innerHTML = `<li class="text-success">Chapter deleted successfully</li>`;
+                            errorsContainer.innerHTML = '';
+                            initializeProfile();
+                        }else {
+                            successContainer.innerHTML = '';
+                            errorsContainer.innerHTML = `<li class="text-danger">${result.error.message}</li>`;
+                        }
+                    }
+                })
+            ) )
         } else {
             blogsContainer.innerHTML = '<li>No blogs found</li>';
         }
@@ -123,6 +163,9 @@ async function enableTwoFactor() {
 const initializeProfile = async () => {
     const response = await fetch(`${API_URL_USER}/information`, {
         method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
         credentials: 'include'
     });
 
@@ -194,7 +237,9 @@ form.addEventListener('submit', async (e) => {
 
         const response = await fetch(`${API_URL_USER}/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+             },
             body: JSON.stringify({
                 username: username,
                 password: currentPassword
@@ -223,10 +268,12 @@ form.addEventListener('submit', async (e) => {
             }
 
             const json = JSON.stringify(user);
-
+            
             const updateResponse = await fetch(`${API_URL_USER}/update`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: json,
                 credentials: 'include'
             });

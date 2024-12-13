@@ -1,6 +1,7 @@
 const { Router } = require('express');
+const { verifyJWToken } = require('../middlewares/auth');
 const passport = require('passport');
-const { createAccount, loginUser, logoutUser, getCurrentUser, isLogged, isTwoFactorActivate, getQrCode, getLogin, showQrModal, getRegister, getProfileView, getUsersPublics, updateUser, passwordMatch, isValidProfile, verifyToken } = require('../controllers/users.controllers');
+const { createAccount, loginUser, logoutAllDevices, logoutUser, getCurrentUser, isLogged, isTwoFactorActivate, getQrCode, getLogin, showQrModal, getRegister, getProfileView, getUsersPublics, updateUser, passwordMatch, isValidProfile, verifyToken } = require('../controllers/users.controllers');
 
 const router = Router();
 
@@ -24,19 +25,21 @@ router.get('/auth/github/callback',
         res.redirect('/');
     }
 );
-router.post('/verify-profile', isValidProfile)
-router.get('/modal-qr', showQrModal)
+router.post('/verify-profile', isValidProfile);
+router.get('/modal-qr', showQrModal);
 router.get('/register', getRegister);
-router.put('/update', updateUser);
-router.post('/verify', passwordMatch)
+router.get('/verifierToken', verifyJWToken);
+router.put('/update',verifyJWToken, updateUser);
+router.post('/verify', verifyJWToken, passwordMatch);
 router.post('/login', loginUser);
 router.post('/two-factor-active', isTwoFactorActivate);
-router.post('/logout', logoutUser);
-router.get('/information', getCurrentUser)
-router.get('/profile', getProfileView)
-router.get('/isLogged', isLogged)
-router.get('/publics', getUsersPublics)
-router.get('/qrcode', getQrCode)
+router.post('/logout', verifyJWToken, logoutUser);
+router.post('/logout-all', verifyJWToken, logoutAllDevices);
+router.get('/information', verifyJWToken, getCurrentUser);
+router.get('/profile', getProfileView);
+router.get('/isLogged', verifyJWToken, isLogged);
+router.get('/publics', getUsersPublics);
+router.get('/qrcode', getQrCode);
 router.post('/verify-2fa', verifyToken);
 
 
