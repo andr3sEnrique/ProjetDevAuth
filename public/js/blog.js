@@ -1,7 +1,5 @@
 const form = document.querySelector("form");
-const API_URL_BLOG = 'http://localhost:3000/blog'
 const urlParams = new URLSearchParams(window.location.search);
-const token = localStorage.getItem('token');
 const blogId = urlParams.get('id');
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (response.ok && result.success) {
         
         const data = result.data;
-console.log(data);
+
         Object.keys(data).forEach((key) => {
             const input = document.getElementById(key);
             if (input) {

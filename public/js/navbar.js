@@ -1,5 +1,3 @@
-const token = localStorage.getItem('token');
-
 const toggleVisibility = async (elements, displayStyle) => {
     await elements.forEach((element) => {
         element.style.display = displayStyle;
@@ -37,7 +35,7 @@ async function initNavbar() {
     })
 
     privateLink.addEventListener('click', async () => {
-        await handleNavigation('/blog/private');
+        await handleNavigation('/user/private');
     })
 }
 
@@ -112,21 +110,6 @@ const logoutAllDevices = async () => {
     }
     
 
-}
-
-const verifyToken = async () => {
-    const response = await fetch(`${API_URL_USER}/verifierToken`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-    });
-
-    const result = await response.json();
-    if (!response.ok && !result.success) return false
-    return true
 }
 
 async function handleNavigation(url) {

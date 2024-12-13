@@ -13,7 +13,6 @@ router.delete('/:id', verifyJWToken, deleteBlog);
 router.get('/update', updateBlog);
 router.get('/one/:id', verifyJWToken, getBlog);
 router.put('/update/:id', verifyJWToken, sendUpdateBlog);
-router.get('/private-blogs', getPrivateBlogs)
 router.post('/', createBlog)
 router.get('/user-blogs', getProfileUser);
 router.get('/content-user/:user', getAllUserBlogs);

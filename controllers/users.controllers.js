@@ -30,6 +30,14 @@ module.exports.getRegister = async (req, res) => {
     res.sendFile(path.join(__dirname, '../public/views/auth', 'register.html'));
 }
 
+module.exports.getPrivateView = (req, res) => {
+    if(req.session?.userId && req.session?.loggedIn) {
+        res.sendFile(path.join(__dirname, '../public/views/content', 'private-blog.html'));
+    }else {
+        res.jsonError("You don't have permission ",401);
+    }
+}
+
 module.exports.getProfileView = async (req, res) => {
     if(req.session?.userId && req.session?.loggedIn) {
         res.sendFile(path.join(__dirname, '../public/views/content', 'profile.html'));
@@ -246,6 +254,33 @@ module.exports.loginUser = async (req,res) => {
         console.log(`Session saved: ${JSON.stringify(req.session)}`);
         return res.jsonSuccess(token, 200);
     });
+}
+
+module.exports.getUsersPrivates = async (req, res) => {
+    try {
+        const usersDir = path.join(__dirname, '../users');
+        const userFiles = fs.readdirSync(usersDir);
+        console.log(userFiles);
+        const privateUsers = [];
+        userFiles.forEach((file) => {
+            console.log(file);
+            const filePath = path.join(usersDir, file);
+            const userData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            console.log(userData.isPublic);
+            if (userData.isPublic === false) {
+                delete userData.password;
+                delete userData.twoFactorEnabled;
+                privateUsers.push({
+                    ...userData
+                });
+            }
+        });
+
+        return res.jsonSuccess(privateUsers, 200);
+    } catch (error) {
+        console.error('Error retrieving public blogs:', error);
+        return res.jsonError('Internal server error', 500);
+    }
 }
 
 module.exports.getUsersPublics = async (req, res) => {

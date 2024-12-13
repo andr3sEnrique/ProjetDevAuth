@@ -1,5 +1,3 @@
-const API_URL_USER = 'http://localhost:3000/user'
-const API_URL_BLOG = 'http://localhost:3000/blog'
 const form = document.querySelector("form");
 const errorsContainer = document.getElementById('errors');
 const successContainer = document.getElementById('success');
@@ -90,12 +88,12 @@ const getBlogs = async () => {
                         });
                         const result = await response.json();
                         if (response.ok && result.success) {
-                            successContainer.innerHTML = `<li class="text-success">Chapter deleted successfully</li>`;
+                            displaySuccess(successContainer, `Content deleted successfully`);
                             errorsContainer.innerHTML = '';
                             initializeProfile();
                         }else {
                             successContainer.innerHTML = '';
-                            errorsContainer.innerHTML = `<li class="text-danger">${result.error.message}</li>`;
+                            displayErrors(errorsContainer, [result.error.message]);
                         }
                     }
                 })
@@ -261,7 +259,6 @@ form.addEventListener('submit', async (e) => {
                 user.isPublic = false;
             }
 
-            console.log(user);
 
             if (user.password) {
                 isValidPassword(user.password, user.confirmPassword);
@@ -280,12 +277,12 @@ form.addEventListener('submit', async (e) => {
 
             const updateResult = await updateResponse.json();
             if (updateResponse.ok && updateResult.success) {
-                successContainer.innerHTML = `<li class="text-success">Information updated successfully</li>`;
+                displaySuccess(successContainer, `Information updated successfully`);
                 errorsContainer.innerHTML = '';
                 initializeProfile();
             } else {
                 successContainer.innerHTML = '';
-                errorsContainer.innerHTML = `<li class="text-danger">${updateResult.error.message}</li>`;
+                displayErrors(errorsContainer, [updateResult.error.message]);
             }
 
             myModal.hide();

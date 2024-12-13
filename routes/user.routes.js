@@ -3,8 +3,9 @@ const { verifyJWToken } = require('../middlewares/auth');
 const passport = require('passport');
 const { createAccount, loginUser, getBlogUserView, logoutAllDevices, logoutUser, 
     getCurrentUser, isLogged, isTwoFactorActivate, getQrCode, getLogin, showQrModal, 
-    getRegister, getProfileView, getUsersPublics, updateUser, passwordMatch, 
-    isValidProfile, verifyToken } = require('../controllers/users.controllers');
+    getRegister, getProfileView, getUsersPublics, getUsersPrivates, updateUser, passwordMatch, 
+    isValidProfile, verifyToken, 
+    getPrivateView} = require('../controllers/users.controllers');
 
 const router = Router();
 
@@ -43,6 +44,8 @@ router.get('/view', getBlogUserView);
 router.get('/profile', getProfileView);
 router.get('/isLogged', verifyJWToken, isLogged);
 router.get('/publics', getUsersPublics);
+router.get('/private', getPrivateView);
+router.get('/privates', getUsersPrivates);
 router.get('/qrcode', getQrCode);
 router.post('/verify-2fa', verifyToken);
 

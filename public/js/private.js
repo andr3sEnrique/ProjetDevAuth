@@ -1,10 +1,12 @@
 const contentContainer = document.getElementById('blog-container');
 
-
 const fetchBlogs = async () => {
-    const response = await fetch(`${API_URL_USER}/publics`, {
+    const response = await fetch(`${API_URL_USER}/privates`, {
         method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+        headers: {'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
     });
 
     const result = await response.json();
@@ -31,11 +33,11 @@ const createBlogs = (blogs) => {
             <div class="card" style="cursor: pointer;" onclick="viewBlog('${blog.username}')">
                 <div class="card-header">
                     <h5>Name :</h5>
-                    <strong>${blog.name}</strong>
+                    <strong>${blog.name || 'unknow' }</strong>
                 </div>
                 <div class="card-body">
                     <h5>Biography :</h5>
-                    <p> ${blog.bio}</p>
+                    <p> ${blog.bio || '...'}</p>
                 </div>
             </div>
         </div>
@@ -60,9 +62,9 @@ async function loadNavbar () {
         });
 }
 
+loadNavbar();
+fetchBlogs();
+
 const viewBlog = (blogId) => {
     window.location.href = `${API_URL_USER}/view?user=${blogId}`;
 }
-
-loadNavbar();
-fetchBlogs();

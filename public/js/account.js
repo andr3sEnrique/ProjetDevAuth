@@ -1,7 +1,6 @@
 const form = document.querySelector("form");
 const errorsContainer = document.getElementById('errors');
 const successContainer = document.getElementById('success');
-const API_URL_USER = 'http://localhost:3000/user'
 const passwordInput = document.getElementById('password');
 const passwordIcon = document.getElementById('show-password');
 
@@ -46,19 +45,14 @@ async function makePostRequest(url, bodyData) {
 
 function handleResponse(result, option) {
     if (result.success) {
-        successContainer.innerHTML = `<li class="text-success">${option} successfully</li>`;
-        errorsContainer.innerHTML = '';
+        displaySuccess(successContainer, `${option} successfully`);
         form.reset();
 
-        if (option === 'login') {
-            localStorage.setItem('token', result.data);
-            window.location.href = '/';
-        } else if (option === 'register') {
-            window.location.href = '/user/login';
-        }
+        if (option === 'login') localStorage.setItem('token', result.data);
+        window.location.href = option === 'login' ? '/' : '/user/login';
+
     } else {
-        successContainer.innerHTML = '';
-        errorsContainer.innerHTML = `<li class="text-danger">${result.error.message}</li>`;
+        displayErrors(errorsContainer, [result.error.message]);
     }
 }
 
@@ -144,3 +138,4 @@ async function handleLoginOrRegister(userData, action) {
     const result = await makePostRequest(`${API_URL_USER}/${action}`, userData);
     handleResponse(result, action);
 }
+
