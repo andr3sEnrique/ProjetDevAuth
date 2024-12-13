@@ -43,7 +43,7 @@ module.exports.updateBlog = async (req, res, next) => {
 }
 
 module.exports.getForm = (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'blog-form.html'));
+    res.sendFile(path.join(__dirname, '../public/views/content', 'blog-form.html'));
 }
 
 module.exports.getNavbar = (req, res) => {
@@ -95,7 +95,7 @@ module.exports.createBlog = async (req, res) => {
 
 }
 
-module.exports.getAllUserBlogs = async (req, res) => {
+module.exports.getProfileUser = async (req, res) => {
     let username;
     if (req.session?.passport?.user?.username) {
         username = req.session.passport.user.username;
@@ -110,5 +110,27 @@ module.exports.getAllUserBlogs = async (req, res) => {
     const allBlogs = await Blog.find({ user: username});
 
     return res.jsonSuccess(allBlogs, 201);
+
+}
+
+module.exports.getAllUserBlogs = async (req, res) => {
+    const { user } = req.params;
+
+    if (!user) {
+        return res.jsonError('User not found', 404);
+    }
+    const userFile = `./users/${user}.json`;
+
+    if (!fs.existsSync(userFile)) {
+        return res.jsonError('User not found', 404);
+    }
+
+    const userData = JSON.parse(fs.readFileSync(userFile));
+    const responseData = { ...userData };
+    delete responseData.password;
+
+    const allBlogs = await Blog.find({ user: user});
+    responseData.blogs = allBlogs;
+    return res.jsonSuccess(responseData, 201);
 
 }

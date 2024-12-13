@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { verifyJWToken } = require('../middlewares/auth');
 
-const { getFeaturedBlogsPublics, getBlog, sendUpdateBlog, createBlog, updateBlog, getPrivateBlogs, deleteBlog, getBlogsPublics, getNavbar, getAllUserBlogs, getForm } = require("../controllers/blogs.controllers");
+const { getFeaturedBlogsPublics, getProfileUser, getBlog, sendUpdateBlog, createBlog, updateBlog, getPrivateBlogs, deleteBlog, getBlogsPublics, getNavbar, getAllUserBlogs, getForm } = require("../controllers/blogs.controllers");
 
 const router = Router();
 
@@ -15,7 +15,8 @@ router.get('/one/:id', verifyJWToken, getBlog);
 router.put('/update/:id', verifyJWToken, sendUpdateBlog);
 router.get('/private-blogs', getPrivateBlogs)
 router.post('/', createBlog)
-router.get('/user-blogs', getAllUserBlogs)
+router.get('/user-blogs', getProfileUser);
+router.get('/content-user/:user', getAllUserBlogs);
 
 
 module.exports = router;

@@ -7,7 +7,6 @@ const SECRET_KEY = 'uQb3$rXzL#91hN4M*7KdY!@zX&pfQ2!d';
 const jwt = require('jsonwebtoken');
 const { addToBlacklist, clearBlacklist } = require('../middlewares/auth');
 
-
 const getUsernameFromToken = (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,23 +18,28 @@ const getUsernameFromToken = (req) => {
     return decoded.username;
 };
 
+module.exports.getBlogUserView = (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/views/content', 'blog-user.html'));
+}  
+
 module.exports.getLogin = async (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'login.html'));
+    res.sendFile(path.join(__dirname, '../public/views/auth', 'login.html'));
 }
+
 module.exports.getRegister = async (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'register.html'));
+    res.sendFile(path.join(__dirname, '../public/views/auth', 'register.html'));
 }
 
 module.exports.getProfileView = async (req, res) => {
     if(req.session?.userId && req.session?.loggedIn) {
-        res.sendFile(path.join(__dirname, '../public', 'profile.html'));
+        res.sendFile(path.join(__dirname, '../public/views/content', 'profile.html'));
     }else {
         res.jsonError("You don't have permission ",401);
     }
 }
 
 module.exports.showQrModal = (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'qrcode-modal.html'));
+    res.sendFile(path.join(__dirname, '../public/views/auth', 'qrcode-modal.html'));
 }
 
 module.exports.isValidProfile = async (req, res) => {

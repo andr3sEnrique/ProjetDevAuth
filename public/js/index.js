@@ -19,42 +19,6 @@ const fetchBlogs = async () => {
     }
 }
 
-// const fetchAllBlogs = async () => {
-//     const response = await fetch(`${API_URL_BLOG}/all`, {
-//         method: 'get',
-//         headers: {'Content-Type': 'application/json'}
-//     });
-//     const result = await response.json();
-//     const blogs = result.data;
-
-//     if (Array.isArray(result.data) && result.data.length > 0) {
-//         createBlogs(blogs);
-//     }else {
-//         noBlogs();
-//     }
-// };
-
-// const loadContent = (url, callback = null) => {
-//     fetch(url)
-//     .then(response => response.text())
-//     .then(data => {
-//         contentContainer.innerHTML = data;
-//         if(url === 'profile.html') {
-//             const script = document.createElement('script');
-//             script.src = 'js/profile.js';
-//             script.onload = () => {
-//                 if (callback) callback();
-//             };
-//             document.body.appendChild(script);
-//         }else {
-//             if(callback) callback();
-//         }
-//     })
-//     .catch(error => console.log('Error loading content', error));
-// }
-
-
-
 const noBlogs = () => {
     contentContainer.innerHTML = `
         <div class="alert alert-info text-center mt-2" role="alert">
@@ -70,12 +34,14 @@ const createBlogs = (blogs) => {
 
         blogNode.innerHTML  = `
             <div class="mt-4">
-            <div class="card">
+            <div class="card" style="cursor: pointer;" onclick="viewBlog('${blog.username}')">
                 <div class="card-header">
-                    <p><strong>Name:</strong> ${blog.name || '' }</p>
+                    <h5>Name :</h5>
+                    <strong>${blog.name}</strong>
                 </div>
                 <div class="card-body">
-                    <p><strong>Biography:</strong> ${blog.bio || '' }</p>
+                    <h5>Biography :</h5>
+                    <p> ${blog.bio}</p>
                 </div>
             </div>
         </div>
@@ -100,6 +66,9 @@ async function loadNavbar () {
         });
 }
 
+const viewBlog = (blogId) => {
+    window.location.href = `${API_URL_USER}/view?user=${blogId}`;
+}
 
 loadNavbar();
 fetchBlogs();

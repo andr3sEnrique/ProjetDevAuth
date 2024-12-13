@@ -341,8 +341,6 @@ btnCreate.addEventListener('click', async () => {
                 const formData = new FormData(createBlogForm);
                 const blogData = Object.fromEntries(formData.entries());
 
-                console.log(blogData);
-
                 try {
                     const response = await fetch(`${API_URL_BLOG}`, {
                         method: 'POST',
@@ -356,6 +354,8 @@ btnCreate.addEventListener('click', async () => {
                     if (response.ok && result.success) {
                         alert('Blog created successfully!');
                         myModal.hide();
+                        initializeProfile();
+
                     } else {
                         alert('Error creating blog: ' + result.error.message);
                     }
@@ -375,7 +375,9 @@ btnCreate.addEventListener('click', async () => {
 const isValidProfile = async () => {
     const response = await fetch(`${API_URL_USER}/verify-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+         },
         credentials: 'include'
     });
 
