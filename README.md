@@ -30,12 +30,12 @@ git clone https://github.com/andr3sEnrique/ProjetDevAuth.git
 - cd ProjetDevAuth
 - npm install
 
-- ### 3. Modifier l'URL du cluster MongoDB
+### 3. Modifier l'URL du cluster MongoDB
 
 - Le projet utilise MongoDB comme base de données. Pour connecter votre propre cluster MongoDB, modifiez l'URL de connexion dans le fichier de configuration.
 - Ouvrez le fichier config/index.js et remplacez l'URL de connexion par celle de votre cluster MongoDB
 
-- ### 4. Démarrer le serveur
+### 4. Démarrer le serveur
 - Pour exécuter le projet en mode développement, utilisez la commande suivante :
 ```bash
 node index.js
