@@ -82,7 +82,6 @@ module.exports.createBlog = async (req, res) => {
     if (existingBlog) return res.jsonError(
         `A blog is existing with the same title: ${body.title}`, 409);
     
-    console.log("user: ", username, name);
 
     const newBlog = new Blog({
         author: name,

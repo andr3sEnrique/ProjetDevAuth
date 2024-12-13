@@ -251,7 +251,6 @@ module.exports.loginUser = async (req,res) => {
             console.error('Error saving session:', err);
             return res.jsonError('Failed to save session', 500);
         }
-        console.log(`Session saved: ${JSON.stringify(req.session)}`);
         return res.jsonSuccess(token, 200);
     });
 }
@@ -260,13 +259,10 @@ module.exports.getUsersPrivates = async (req, res) => {
     try {
         const usersDir = path.join(__dirname, '../users');
         const userFiles = fs.readdirSync(usersDir);
-        console.log(userFiles);
         const privateUsers = [];
         userFiles.forEach((file) => {
-            console.log(file);
             const filePath = path.join(usersDir, file);
             const userData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-            console.log(userData.isPublic);
             if (userData.isPublic === false) {
                 delete userData.password;
                 delete userData.twoFactorEnabled;
