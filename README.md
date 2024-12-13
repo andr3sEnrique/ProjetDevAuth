@@ -23,3 +23,19 @@ Utilisez la commande suivante pour cloner ce dépôt sur votre machine locale :
 
 ```bash
 git clone https://github.com/andr3sEnrique/ProjetDevAuth.git
+
+```
+### 2. Installer les dépendances
+
+- cd ProjetDevAuth
+- npm install
+
+- ### 3. Modifier l'URL du cluster MongoDB
+
+- Le projet utilise MongoDB comme base de données. Pour connecter votre propre cluster MongoDB, modifiez l'URL de connexion dans le fichier de configuration.
+- Ouvrez le fichier config/index.js et remplacez l'URL de connexion par celle de votre cluster MongoDB
+
+- ### 4. Démarrer le serveur
+- Pour exécuter le projet en mode développement, utilisez la commande suivante :
+```bash
+node index.js
